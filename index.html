@@ -1,395 +1,61 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="de">
+
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Stammlängen-Teiler</title>
-  <style>
-    :root{--bg:#f6f7fb;--card:#fff;--accent:#2563eb;--muted:#6b7280}
-    html,body{height:100%;margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:#0f172a}
-    .wrap{max-width:900px;margin:40px auto;padding:20px}
-    header{display:flex;align-items:center;gap:16px;margin-bottom:18px}
-    h1{font-size:20px;margin:0}
-    p.lead{margin:0;color:var(--muted)}
-    .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 18px rgba(13,65,161,0.06)}
-    form.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
-    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-    .input-row{display:flex;gap:8px}
-    input[type=number], input[type=text], select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;font-size:15px}
-    .controls{display:flex;gap:8px;align-items:center}
-    button{background:var(--accent);color:white;border:0;padding:10px 12px;border-radius:8px;font-weight:600;cursor:pointer}
-    button.secondary{background:#f3f4f6;color:#0f172a}
-    .result{margin-top:14px;padding:12px;border-radius:10px;background:#f8fafc;border:1px solid #eef2ff}
-    .result .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(15,23,42,0.04)}
-    .result .row:last-child{border-bottom:0}
-    .mark-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed rgba(15,23,42,0.04)}
-    .mark-row:last-child{border-bottom:0}
-    .mark-value{font-weight:700;font-size:16px;color:#0f172a}
-    .small{font-size:13px;color:var(--muted)}
-    .example{font-size:13px;color:var(--muted);margin-top:8px}
-    footer{margin-top:12px;font-size:13px;color:var(--muted)}
-    @media (max-width:520px){header{align-items:flex-start;flex-direction:column}}
-    /* Grafische Stamm-Darstellung */
-    .logviz{margin-top:14px;padding:10px;background:#fff;border:1px solid #e5e7eb;border-radius:10px}
-    .logbar{
-      position:relative;
-      height:140px;
-      border-radius:40px;
-      background-image: url('relief-texture-brown-bark-tree-close-up.jpg');
-      background-repeat: no-repeat;
-      background-size: cover; /* Bild füllt gesamten Stamm */
-      background-position: center; /* mittig, oben/unten wird automatisch gezoomt */
-      box-shadow:
-        inset 0 18px 28px rgba(0,0,0,0.55),
-        inset 0 -18px 28px rgba(0,0,0,0.55),
-        0 14px 28px rgba(0,0,0,0.30);
-      overflow:hidden;
-    }
-    div input#kerf {
-        width: 100%;        /* nimmt maximal die Breite des Containers */
-        max-width: 200px;   /* optional: maximale Breite festlegen */
-        box-sizing: border-box; /* Padding und Border werden in die Breite eingerechnet */
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gutsgärtnerei Ohr</title>
+    <meta name="description" content="Gutsgärtnerei Ohr in Emmerthal">
     
-    .logbar::before{
-      top:0;
-      border-top-left-radius:55px;
-      border-top-right-radius:55px;
-      box-shadow:inset 0 -4px 6px rgba(0,0,0,0.6);
-    }
-
-    .logbar::after{
-      bottom:0;
-      border-bottom-left-radius:55px;
-      border-bottom-right-radius:55px;
-      box-shadow:inset 0 4px 6px rgba(0,0,0,0.6);
-    }
-    .segment{
-      position:absolute;
-      top:0;
-      height:100%;
-      border-right:2px solid rgba(60,30,10,0.4);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:#ffffff;
-      font-size:16px;
-      font-weight:600;
-      background:rgba(255,255,255,0.08);
-    }
-    .cut{
-      position:absolute;
-      top:0;
-      height:100%;
-      background:linear-gradient(
-        90deg,
-        rgba(120,0,0,0.9),
-        rgba(220,38,38,0.8),
-        rgba(120,0,0,0.9)
-      );
-      box-shadow:inset 0 0 6px rgba(0,0,0,0.6);
-    }
-    .label{position:absolute;top:-22px;font-size:11px;white-space:nowrap;transform:translateX(-50%);color:#111827}
-    .seglabel {
-    pointer-events: none;
-    text-shadow: 0 1px 2px rgba(255,255,255,0.7);
-    text-align: center; /* horizontal zentrieren */
-    display: block;     /* falls es ein inline-Element ist */
-    }
-  </style>
-  </style>
+    <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>Stammlängen-Teiler</h1>
-        <p class="lead">Gib die Stamm-Länge und die maximale Scheitlänge ein — die App berechnet die Stückzahl und die exakte Länge pro Stück.</p>
-      </div>
-    </header>
-
-    <div class="card">
-      <form id="calcForm" class="grid" onsubmit="return false;">
-        <div>
-          <label for="totalLen">Stammlänge</label>
-          <div class="input-row">
-            <input id="totalLen" type="text" inputmode="decimal" placeholder="z. B. 2 oder 200" aria-label="Stammlänge" />
-            <select id="totalUnit" aria-label="Einheit" title="Einheit von Stammlänge">
-              <option value="m">m</option>
-              <option value="cm">cm</option>
-            </select>
-          </div>
-          <div class="small">Gib Meter (m) oder Zentimeter (cm) ein. Dezimaltrennzeichen "." oder "," ist erlaubt.</div>
+    <main class="landing-container">
+        <div class="logo-wrapper">
+            <img src="assets/logo.png" alt="Gutsgärtnerei Ohr Logo" class="brand-logo" id="logo">
         </div>
 
-        <div>
-          <label for="maxLen">Maximale Scheitlänge</label>
-          <div class="input-row">
-            <input id="maxLen" type="text" inputmode="decimal" placeholder="z. B. 30" aria-label="Maximale Scheitlänge" />
-            <select id="maxUnit" aria-label="Einheit" title="Einheit von Scheitlänge">
-              <option value="cm">cm</option>
-              <option value="m">m</option>
-            </select>
-          </div>
-          <div class="small">Die App berechnet <em>wie viele</em> Stücke (minimal) benötigt werden und die gleichmäßige Länge pro Stück.</div>
+        <div class="content-wrapper">
+            <h1 class="main-title">Gutsgärtnerei Ohr</h1>
+            <p class="subtitle">Natürlich. Nachhaltig. Regional.</p>
+
+            <div class="action-section">
+                <a href="ppwr/index.html" class="btn-primary">
+                    <span class="btn-text">Informationen zur PPWR</span>
+                    <svg class="btn-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                </a>
+            </div>
         </div>
+    </main>
 
-        <div>
-          <label for="decimals">Nachkommastellen</label>
-          <select id="decimals" aria-label="Anzahl Nachkommastellen">
-            <option value="0">0</option>
-            <option value="1" selected>1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-          </select>
+    <footer class="site-footer">
+        <div class="footer-content">
+            <p>&copy; 2026 Gutsgärtnerei Ohr. Alle Rechte vorbehalten. | <a href="datenschutz/index.html" style="color: white;">Datenschutz</a></p>
+            <div class="impressum-template">
+                <h3>Impressum</h3>
+                <p><strong>Angaben gemäß § 5 TMG:</strong></p>
+                <p>Gutsgärtnerei Ohr<br>
+                    Auf dem Rittergut 0<br>
+                    31860 Emmerthal</p>
+
+                <p><strong>Vertreten durch:</strong><br>
+                    Alfred Schäfer</p>
+
+                <p><strong>Kontakt:</strong><br>
+                    Telefon: +49 (0) 5151 65057<br>
+                    E-Mail: gutsgaertnerei-ohr@t-online.de</p>
+
+                <p><strong>Umsatzsteuer-ID:</strong><br>
+                    Umsatzsteuer-Identifikationsnummer gemäß § 27 a Umsatzsteuergesetz:<br>
+                    2224115169</p>
+            </div>
         </div>
-
-        <div>
-          <label for="kerf">Schnittstärke pro Schnitt (mm)</label>
-          <input id="kerf" type="text" inputmode="decimal" placeholder="z. B. 3" aria-label="Schnittbreite in mm" />
-          <div class="small">Wird pro Schnitt einmal abgezogen (Verlust).</div>
-        </div>
-
-        <div class="controls" style="align-self:center">
-          <button id="calcBtn" type="button">Berechnen</button>
-          <button id="resetBtn" type="button" class="secondary">Zurücksetzen</button>
-        </div>
-
-      </form>
-
-      <div id="output" class="result" aria-live="polite" style="display:none">
-        <div class="row"><div class="small">Stückzahl</div><div id="pieces" style="font-weight:700"></div></div>
-        <div class="row"><div class="small">Länge pro Stück</div><div id="pieceLen" style="font-weight:700"></div></div>
-        <div class="row"><div class="small">Kontrollrechnung</div><div id="check" class="small"></div></div>
-        <div class="row"><div class="small">Anzahl Schnitte</div><div id="cuts" style="font-weight:700"></div></div>
-        <div style="margin-top:10px">
-          <div class="small" style="font-weight:600;margin-bottom:4px">Markierungen (über den gesamten Stamm)</div>
-          <div id="marksFull" class="small" style="line-height:1.6"></div>
-        </div>
-        <div style="margin-top:10px">
-          <div class="small" style="font-weight:600;margin-bottom:4px">Markierung(1 Stück) (Wenn immer vom Rest-Stamm gemessen wird)</div>
-          <div class="row"><div class="small">Nächster Schnitt vom aktuellen Stammende:</div><div id="marksRest" style="font-weight:700"></div></div>
-        </div>
-          
-        </div>
-        <div class="logviz">
-          <div class="small" style="font-weight:600;margin-bottom:6px">Grafische Darstellung des Stammes</div>
-          <div id="logBar" class="logbar"></div>
-        </div>
-      </div>
-
-    </div>
-
-    <footer>by Silas Korbach</footer>
-  </div>
-
-  <script>
-    // Hilfsfunktionen
-    const el = id => document.getElementById(id);
-    function parseGermanNumber(s){
-      if(typeof s !== 'string') return NaN;
-      s = s.trim().replace(',', '.');
-      // remove any stray spaces
-      s = s.replace(/\s+/g, '');
-      const n = Number(s);
-      return Number.isFinite(n) ? n : NaN;
-    }
-
-    function toCm(value, unit){
-      if(unit === 'm') return value * 100;
-      return value;
-    }
-
-    function formatNumber(n, decimals){
-      // show decimal comma for German locale
-      return n.toFixed(decimals).replace('.', ',');
-    }
-
-    // Berechnung der Stückzahl unter Berücksichtigung des Kerf
-    function calculatePieces(totalCm, maxCm, kerfMm) {
-      const kerfCm = kerfMm / 10; // mm -> cm
-
-      // Start mit minimaler Stückzahl
-      let pieces = 2;
-
-      while (pieces > 0) {
-        const totalKerfCm = kerfCm * (pieces - 1); // Gesamtschnittbreite
-        const usableCm = totalCm - totalKerfCm;
-        const pieceLenCm = usableCm / pieces;
-
-        if (pieceLenCm <= maxCm) {
-          return { pieces, pieceLenCm };
-        }
-        pieces++;
-      }
-
-      // Fallback: nur ein Stück möglich
-      return { pieces: 1, pieceLenCm: totalCm };
-    }
-
-    function calculate(){
-      const totalRaw = el('totalLen').value;
-      const totalUnit = el('totalUnit').value;
-      const maxRaw = el('maxLen').value;
-      const maxUnit = el('maxUnit').value;
-      const decimals = parseInt(el('decimals').value, 10);
-      const kerfRaw = el('kerf').value;
-      const kerfVal = parseGermanNumber(kerfRaw);
-      const kerfMm = Number.isFinite(kerfVal) && kerfVal > 0 ? kerfVal : 0;
-
-      const totalVal = parseGermanNumber(totalRaw);
-      const maxVal = parseGermanNumber(maxRaw);
-
-      // validation
-      if(!Number.isFinite(totalVal) || totalVal <= 0){
-        alert('Bitte gib eine gültige Stammlänge > 0 ein.');
-        return;
-      }
-      if(!Number.isFinite(maxVal) || maxVal <= 0){
-        alert('Bitte gib eine gültige maximale Scheitlänge > 0 ein.');
-        return;
-      }
-
-      // in cm
-      const totalCm = toCm(totalVal, totalUnit);
-      const maxCm = toCm(maxVal, maxUnit);
-
-      if(maxCm <= 0){ alert('Ungültige maximale Länge.'); return; }
-
-      // Stückzahl unter Berücksichtigung der Schnittbreite bestimmen
-      const result = calculatePieces(totalCm, maxCm, kerfMm);
-      let pieces = result.pieces;
-      let pieceLenCm = result.pieceLenCm;
-
-      // Formatiere Ausgabe
-      const pieceLenCmStr = formatNumber(pieceLenCm, decimals) + ' cm';
-      const piecesStr = String(pieces);
-      const cuts = Math.max(0, pieces - 1);
-      const checkStr = `${pieces} × ${formatNumber(pieceLenCm, decimals)} cm = ${formatNumber(pieceLenCm * pieces, 2)} cm`;
-
-      el('pieces').textContent = piecesStr;
-      el('pieceLen').textContent = pieceLenCmStr;
-      el('check').textContent = checkStr;
-      el('cuts').textContent = cuts;
-
-      // Markierungen berechnen
-      const kerfCm = kerfMm / 10;
-      const markList = [];
-      let pos;
-      for(let i = 1; i <= cuts; i++){
-        if(i == 1) {
-          pos = i * (pieceLenCm + (kerfCm / 2));
-        }else {
-          pos = pos + (pieceLenCm + kerfCm);
-        }
-        markList.push(`${i}. Schnitt: ${formatNumber(pos, decimals)} cm`);
-      }
-      // Markierungen als strukturierte Rows darstellen
-      el('marksFull').innerHTML = '';
-      markList.forEach((text, index) => {
-        const parts = text.split(':');
-        const row = document.createElement('div');
-        row.className = 'mark-row';
-
-        const left = document.createElement('div');
-        left.className = 'small';
-        left.textContent = parts[0];
-
-        const right = document.createElement('div');
-        right.className = 'mark-value';
-        right.textContent = parts[1].trim();
-
-        row.appendChild(left);
-        row.appendChild(right);
-        el('marksFull').appendChild(row);
-      });
-
-      // Wenn immer vom Rest gemessen wird (Mitte des Schnittes berücksichtigen)
-      const restMeasure = pieceLenCm + (kerfCm / 2);
-      if(cuts > 0){
-        el('marksRest').textContent = `${formatNumber(restMeasure, decimals)} cm`;
-      } else {
-        el('marksRest').textContent = '-';
-      }
-
-      // Grafische Darstellung erzeugen
-      renderLog(totalCm, pieceLenCm, kerfCm, pieces);
-
-      el('output').style.display = '';
-
-      
-    }
-
-    // Event listeners
-    el('calcBtn').addEventListener('click', calculate);
-    el('resetBtn').addEventListener('click', () => {
-      el('totalLen').value = '';
-      el('maxLen').value = '';
-      el('output').style.display = 'none';
-    });
-
-    
-
-    
-
-    // Enter drücken in Eingabefeldern löst Berechnen aus
-    ['totalLen','maxLen'].forEach(id => {
-      el(id).addEventListener('keydown', e => {
-        if(e.key === 'Enter') calculate();
-      });
-    });
-
-    // Demo-Werte (optional):
-    el('totalLen').value = '2';
-    el('totalUnit').value = 'm';
-    el('maxLen').value = '30';
-    el('maxUnit').value = 'cm';
-
-    function renderLog(totalCm, pieceLenCm, kerfCm, pieces){
-      const decimals = parseInt(el('decimals').value, 10);
-      const bar = el('logBar');
-      bar.innerHTML = '';
-      const cuts = Math.max(0, pieces - 1);
-      const scale = 100 / totalCm; // Prozent pro cm
-
-      let currentPos = 0;
-      for(let i=0;i<pieces;i++){
-        const segWidth = pieceLenCm * scale;
-        const seg = document.createElement('div');
-        seg.className = 'segment';
-        seg.style.left = (currentPos * scale) + '%';
-        seg.style.width = segWidth + '%';
-        bar.appendChild(seg);
-
-        // Scheitlänge direkt im Segment anzeigen
-        const segLabel = document.createElement('div');
-        segLabel.className = 'seglabel';
-        segLabel.textContent = formatNumber(pieceLenCm, decimals) + ' cm';
-        seg.appendChild(segLabel);
-
-        currentPos += pieceLenCm;
-
-        if(i < cuts){
-          const cutWidth = kerfCm * scale;
-          const cut = document.createElement('div');
-          cut.className = 'cut';
-          cut.style.left = (currentPos * scale) + '%';
-          cut.style.width = cutWidth + '%';
-          bar.appendChild(cut);
-
-          const label = document.createElement('div');
-          label.className = 'label';
-          label.style.left = ((currentPos + kerfCm/2) * scale) + '%';
-          label.textContent = formatNumber(currentPos,2) + ' cm | Schnitt ' + (i+1);
-          bar.appendChild(label);
-
-          currentPos += kerfCm;
-        }
-      }
-    }
-
-    // automatische initiale Berechnung
-    calculate();
-  </script>
+    </footer>
 </body>
+
 </html>
